@@ -7,6 +7,9 @@ int main (void){
     char* name = "cambiameporotronombre.txt";
     FILE *pFile = fopen( name, "a" );
     
+    ctTree** arbol = NULL;
+    ct_new(arbol);
+
     fprintf(pFile,"-\n");
         
     fclose( pFile );
