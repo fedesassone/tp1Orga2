@@ -59,3 +59,11 @@ uint32_t ctIter_get(ctIter* ctIt);
 
 uint32_t ctIter_valid(ctIter* ctIt);
 
+//auxiliares next
+
+void ctIter_aux_down(ctIter* ctIt);
+
+void ctIter_aux_up(ctIter* ctIt);
+
+uint32_t ctIter_aux_isIn(ctNode* current, ctNode* father);
+

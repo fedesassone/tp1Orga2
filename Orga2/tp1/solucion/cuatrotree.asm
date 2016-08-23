@@ -153,8 +153,8 @@ ctIter_first:
 			.menorNodo: ; entramos aca si estamos en el nodo de abajo a la izq de todo
 			mov [rdi + iter_tree_OFFSET], rbx ; el arbol 
 			mov [rdi + iter_node_OFFSET], r12 ; el nodo
-			mov byte  [rdi + iter_current_OFFSET], null; el current 
-			mov dword [rdi + iter_count_OFFSET], null ;contador 
+			mov byte  [rdi + iter_current_OFFSET], null; el current (es 0 la primer posicion)
+			mov dword [rdi + iter_count_OFFSET], 1 ;contador, al posicionar el primero es 1 
 		.fin:
 		pop r12
 		pop rbx	
@@ -163,7 +163,44 @@ ctIter_first:
 
 ; =====================================
 ; void ctIter_next(ctIter* ctIt);
+;iter de la forma: |*arbol|*nodo actual|byte valorActual|double Count|
 ctIter_next:
+		push rbp
+		mov rsp, rbp
+		;cmp byte [rdi + iter_current_OFFSET], 2
+		;je .ultimo
+		.currentMas:
+		xor rcx, rcx
+		mov cl, [rdi + iter_current_OFFSET]
+		inc cl
+		mov [rdi + iter_current_OFFSET], cl
+		.hijo?:
+		mov r9, [rdi + iter_node_OFFSET]; el nodo en r9
+		lea r8, [r9 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
+		shl rcx, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
+		cmp qword [r8 + rcx], null ; me fijo si el hijo de current es null
+		je .noHijos
+		jmp .hijos
+		.noHijos:
+		shr rcx, 3
+		xor rax, rax
+		mov al, [r9 + nodo_len_OFFSET]
+		dec al
+		cmp cl, al
+		jg .calleoUp
+		jmp .fin
+		.calleoUp:
+		call ctIter_aux_up
+		jmp .fin
+		.hijos:
+		mov r8, [r8 + rcx]; el hijo de current 
+		mov [rdi + iter_node_OFFSET], r8
+		call ctIter_aux_down
+		.fin:
+		mov esi, [rdi + iter_count_OFFSET]
+		inc esi
+		mov [rdi + iter_count_OFFSET], esi
+		pop rbp
         ret
 
 ; =====================================
@@ -195,6 +232,77 @@ ctIter_valid:
 			.fin:
 		pop rbp
         ret
+
+; =====================================Auxiliares ctIter_next
+;void ctIter_aux_down(ctIter* ctIt);
+ctIter_aux_down:
+		push rbp
+		mov rsp, rbp
+			mov r8, [rdi + iter_node_OFFSET]
+			.ciclo:
+			cmp qword[r8 + nodo_hijo0_OFFSET], null
+			je .llegue
+			mov r8, [r8 + nodo_hijo0_OFFSET]
+			jmp .ciclo
+			.llegue:
+			mov qword [rdi + iter_node_OFFSET], r8
+			mov byte [rdi + iter_current_OFFSET], 0
+			mov esi, [rdi + iter_count_OFFSET]
+			inc esi
+			mov [rdi + iter_count_OFFSET], esi
+		pop rbp
+		ret
+
+; =====================================
+;void ctIter_aux_up(ctIter* ctIt);
+
+ctIter_aux_up:
+		push rbp
+		mov rsp, rbp
+		push r12
+		push r13
+			mov r12, rdi; guado iter
+			mov r8, [rdi + iter_node_OFFSET];nodo actual
+			mov rsi, [r8 + nodo_padre_OFFSET];padre actual
+			call ctIter_aux_isIn
+			mov r9, rax
+			cmp al, 3 ; maximo posible
+			je .sigoSubiendo
+			mov [r12 + iter_node_OFFSET], r8; paso al padre 
+			;mov byte[rdi + iter_current_OFFSET], r9; el current 
+			jmp .fin
+			.sigoSubiendo:
+			;TODO/// revisarla entera, está hecha para la mierda
+		.fin:	
+		pop r13
+		pop r12
+		pop rbp
+		ret
+
+; =====================================
+;uint32_t ctIter_aux_isIn(ctNode* current, ctNode* father);
+ctIter_aux_isIn:
+		push rbp
+		mov rsp, rbp
+		;rdi = nodo actual
+		;rsi = padre
+		xor rcx, rcx
+		lea r8,[rsi+nodo_hijo0_OFFSET]
+		.ciclo:
+		cmp [r8], rdi
+		je .encontrado
+		inc ecx
+		lea r8, [r8 + 8]
+		jmp .ciclo
+		.encontrado:
+		xor rax, rax
+		mov eax, ecx
+		pop rbp
+		ret
+
+
+
+
 
 
 
