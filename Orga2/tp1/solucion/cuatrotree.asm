@@ -20,12 +20,12 @@
 
   %define pointer_SIZE 			8
   %define double_int_SIZE		4		
-  %define str_arbol_SIZE 		12
+  %define str_tree_SIZE 		12
   %define str_iter_SIZE			21
   %define str_node_SIZE			53
 
-  %define arbol_root_OFFSET 	0
-  %define arbol_size_OFFSET		8
+  %define tree_root_OFFSET	 	0
+  %define tree_size_OFFSET		8
   %define nodo_padre_OFFSET		0
   %define nodo_value0_OFFSET	8
   %define nodo_value1_OFFSET	12
@@ -54,12 +54,12 @@ ct_new:
 		push rbp
 		mov rsp, rbp
 			mov r9, rdi; **tree
-			mov rdi, str_arbol_SIZE
+			mov rdi, str_tree_SIZE
 			xor rax, rax
 			call malloc
-			mov rdi, rax ; rdi = puntero a memoria para el str_arbol_SIZE
-			mov qword [rdi + arbol_root_OFFSET], null
-			mov dword [rdi + arbol_size_OFFSET], null
+			mov rdi, rax ; rdi = puntero a memoria para el str_tree_SIZE
+			mov qword [rdi + tree_root_OFFSET], null
+			mov dword [rdi + tree_size_OFFSET], null
 			mov r9, rdi
 		pop rbp
         ret
@@ -75,9 +75,9 @@ ct_delete:
 		push r14
 			mov rbx, rdi ; rbx=**tree
 			mov r12, [rbx];r12=*tree
-			cmp qword [r12+arbol_root_OFFSET], null
+			cmp qword [r12+tree_root_OFFSET], null
 			je .fin
-			mov r9, [r8 + arbol_root_OFFSET]
+			mov r9, [r8 + tree_root_OFFSET]
 
 			.fin:
 			mov rdi, r8
@@ -88,11 +88,36 @@ ct_delete:
 ; ; =====================================
 ; ; void ct_aux_print(ctNode* node);
 ct_aux_print:
+		push rbp
+		mov rsp, rbp
+		push rbx
+		push r12
+
+
+		pop r12
+		pop rbx
+		pop rbp
         ret
 
 ; ; =====================================
-; ; void ct_print(ctTree* ct);
+; ;void ct_print(ctTree* ct, FILE *pFile);
+  ; tiene que devolver las claves ordenadas:
+  ; idea: ir al primero, printear nodo, subir y printear hojas
 ct_print:
+;rdi = ẗree
+;rsi = *pfile
+		push rbp
+		mov rsp, rbp
+		push rbx
+		push r12
+			mov rbx, rdi 
+			mov r12, [rbx + tree_root_OFFSET];raiz
+			mov rdi, r12
+			call ct_aux_print
+
+		pop r12
+		pop rbx
+		pop rbp
         ret
 
 ; =====================================
@@ -128,8 +153,8 @@ ctIter_delete:
 ; =====================================
 ; void ctIter_first(ctIter* ctIt);
 ctIter_first:
-		;tengo en rdi el puntero al iter de la forma: |*arbol|*nodo actual|byte valorActual|double Count|
-		; arbol es de la forma: |nodo* raiz|double tamanio|
+		;tengo en rdi el puntero al iter de la forma: |*tree|*nodo actual|byte valorActual|double Count|
+		; tree es de la forma: |nodo* raiz|double tamanio|
 		; nodo es: |nodo* padre| double[3] valores | byte longitud | nodo*[4] hijos|
 		push rbp
 		mov rsp, rbp
@@ -137,10 +162,10 @@ ctIter_first:
 		push r12
 			cmp qword [rdi + iter_tree_OFFSET], null
 			je .fin
-			mov rbx, [rdi+ iter_tree_OFFSET]; en rbx el puntero al arbol
-			cmp qword [rdi + arbol_root_OFFSET], null
+			mov rbx, [rdi+ iter_tree_OFFSET]; en rbx el puntero al tree
+			cmp qword [rdi + tree_root_OFFSET], null
 			je .fin 
-			mov r12, [rbx + arbol_root_OFFSET]; rn r12 el nodo raiz del arbol
+			mov r12, [rbx + tree_root_OFFSET]; rn r12 el nodo raiz del tree
 			cmp byte [r12 + nodo_len_OFFSET], null
 			je .fin
 			.cicloBuscoMenor:
@@ -151,7 +176,7 @@ ctIter_first:
 			mov r12,  [r12 + nodo_hijo0_OFFSET]
 			jmp .cicloBuscoMenor
 			.menorNodo: ; entramos aca si estamos en el nodo de abajo a la izq de todo
-			mov [rdi + iter_tree_OFFSET], rbx ; el arbol 
+			mov [rdi + iter_tree_OFFSET], rbx ; el tree 
 			mov [rdi + iter_node_OFFSET], r12 ; el nodo
 			mov byte  [rdi + iter_current_OFFSET], null; el current (es 0 la primer posicion)
 			mov dword [rdi + iter_count_OFFSET], 1 ;contador, al posicionar el primero es 1 
@@ -163,43 +188,41 @@ ctIter_first:
 
 ; =====================================
 ; void ctIter_next(ctIter* ctIt);
-;iter de la forma: |*arbol|*nodo actual|byte valorActual|double Count|
+;iter de la forma: |*tree|*nodo actual|byte valorActual|double Count|
+;//Consultar como chequear si es el último
 ctIter_next:
 		push rbp
 		mov rsp, rbp
-		;cmp byte [rdi + iter_current_OFFSET], 2
-		;je .ultimo
-		.currentMas:
-		xor rcx, rcx
-		mov cl, [rdi + iter_current_OFFSET]
-		inc cl
-		mov [rdi + iter_current_OFFSET], cl
-		.hijo?:
-		mov r9, [rdi + iter_node_OFFSET]; el nodo en r9
-		lea r8, [r9 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
-		shl rcx, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
-		cmp qword [r8 + rcx], null ; me fijo si el hijo de current es null
-		je .noHijos
-		jmp .hijos
-		.noHijos:
-		shr rcx, 3
-		xor rax, rax
-		mov al, [r9 + nodo_len_OFFSET]
-		dec al
-		cmp cl, al
-		jg .calleoUp
-		jmp .fin
-		.calleoUp:
-		call ctIter_aux_up
-		jmp .fin
-		.hijos:
-		mov r8, [r8 + rcx]; el hijo de current 
-		mov [rdi + iter_node_OFFSET], r8
-		call ctIter_aux_down
-		.fin:
-		mov esi, [rdi + iter_count_OFFSET]
-		inc esi
-		mov [rdi + iter_count_OFFSET], esi
+			xor rcx, rcx
+			mov cl, [rdi + iter_current_OFFSET]
+			inc cl
+			mov [rdi + iter_current_OFFSET], cl
+			.hijo?:
+			mov r9, [rdi + iter_node_OFFSET]; el nodo en r9
+			lea r8, [r9 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
+			shl rcx, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
+			cmp qword [r8 + rcx], null ; me fijo si el hijo de current es null
+			je .noHijos
+			jmp .hijos
+			.noHijos:
+			shr rcx, 3
+			xor rax, rax
+			mov al, [r9 + nodo_len_OFFSET]
+			dec al
+			cmp cl, al
+			jg .calleoUp
+			jmp .fin
+			.calleoUp:
+			call ctIter_aux_up
+			jmp .fin
+			.hijos:
+			mov r8, [r8 + rcx]; el hijo de current 
+			mov [rdi + iter_node_OFFSET], r8
+			call ctIter_aux_down
+			.fin:
+			mov esi, [rdi + iter_count_OFFSET]
+			inc esi
+			mov [rdi + iter_count_OFFSET], esi ;aumento el count en 1
 		pop rbp
         ret
 
@@ -247,9 +270,6 @@ ctIter_aux_down:
 			.llegue:
 			mov qword [rdi + iter_node_OFFSET], r8
 			mov byte [rdi + iter_current_OFFSET], 0
-			mov esi, [rdi + iter_count_OFFSET]
-			inc esi
-			mov [rdi + iter_count_OFFSET], esi
 		pop rbp
 		ret
 
@@ -262,17 +282,19 @@ ctIter_aux_up:
 		push r12
 		push r13
 			mov r12, rdi; guado iter
-			mov r8, [rdi + iter_node_OFFSET];nodo actual
-			mov rsi, [r8 + nodo_padre_OFFSET];padre actual
+			.inicio:
+			mov rdi, [r12 + iter_node_OFFSET];nodo actual
+			mov rsi, [rdi + nodo_padre_OFFSET];padre actual
+			mov dl, [rsi + nodo_len_OFFSET];long de padre 
+			inc dl ; long del nodo+1
 			call ctIter_aux_isIn
-			mov r9, rax
-			cmp al, 3 ; maximo posible
-			je .sigoSubiendo
-			mov [r12 + iter_node_OFFSET], r8; paso al padre 
-			;mov byte[rdi + iter_current_OFFSET], r9; el current 
+			cmp al, dl ; veo si son =
+			jne .sigoSubiendo ;es el ultimo  //Consultar si se hace así 
+			mov [r12 + iter_node_OFFSET], rsi; paso al padre 
 			jmp .fin
 			.sigoSubiendo:
-			;TODO/// revisarla entera, está hecha para la mierda
+			mov [r12 + iter_node_OFFSET], rsi;paso el padre y sigo sub..
+			jmp .inicio
 		.fin:	
 		pop r13
 		pop r12
@@ -281,6 +303,8 @@ ctIter_aux_up:
 
 ; =====================================
 ;uint32_t ctIter_aux_isIn(ctNode* current, ctNode* father);
+;rdi = *current
+;rsi = *padre 
 ctIter_aux_isIn:
 		push rbp
 		mov rsp, rbp
