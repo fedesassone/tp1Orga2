@@ -86,23 +86,10 @@ ct_delete:
         ret
 
 ; ; =====================================
-; ; void ct_aux_print(ctNode* node);
-ct_aux_print:
-		push rbp
-		mov rsp, rbp
-		push rbx
-		push r12
-
-
-		pop r12
-		pop rbx
-		pop rbp
-        ret
-
-; ; =====================================
 ; ;void ct_print(ctTree* ct, FILE *pFile);
   ; tiene que devolver las claves ordenadas:
   ; idea: ir al primero, printear nodo, subir y printear hojas
+  ; int fprintf ( FILE * stream, const char * format, ... );
 ct_print:
 ;rdi = ẗree
 ;rsi = *pfile
@@ -110,11 +97,33 @@ ct_print:
 		mov rsp, rbp
 		push rbx
 		push r12
-			mov rbx, rdi 
-			mov r12, [rbx + tree_root_OFFSET];raiz
-			mov rdi, r12
-			call ct_aux_print
-
+		push r13
+		push r14
+			mov rbx, rdi; el puntero a arbol 
+			mov r12, rsi; el *pfile
+			call ctIter_new
+			mov r13, rax
+			mov rdi, r13
+			call ctIter_first
+			;tengo en r13 el iter en la primer pos			
+			.ciclo:
+			mov r14, [r13 + iter_node_OFFSET]
+			xor rax, rax
+			mov al, [r13 + iter_current_OFFSET]
+			mov r14, [r14+nodo_value0_OFFSET]
+			shl rax, 2
+			mov edx, [r14 + rax];lo muevo valueSize*current veces
+			mov rdi, r12 ; el pFile
+			;TODO CONSULTAR FORMATO   mov rsi, formato 
+			call fprintf
+			mov rdi, r13
+			call ctIter_next
+			;TODO falta chequear si se anula el iter 
+			;SI SE ANULA JMP A .fin
+			jmp .ciclo
+			.fin:
+		pop r14
+		pop r13
 		pop r12
 		pop rbx
 		pop rbp
