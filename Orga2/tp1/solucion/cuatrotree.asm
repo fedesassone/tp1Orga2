@@ -44,6 +44,7 @@
 
 section .text
 
+format:  DB '%d', 10
 
 ; Se preservan RBX; R12, R13, R14 y R15
 ; Entran por, en orden: rdi, rsi, rdx, rcx, r8, r9, pila.
@@ -114,7 +115,7 @@ ct_print:
 			shl rax, 2
 			mov edx, [r14 + rax];lo muevo valueSize*current veces
 			mov rdi, r12 ; el pFile
-			;TODO CONSULTAR FORMATO   mov rsi, formato 
+			mov rsi, format
 			call fprintf
 			mov rdi, r13
 			call ctIter_next

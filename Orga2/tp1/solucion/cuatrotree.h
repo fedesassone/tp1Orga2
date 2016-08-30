@@ -38,7 +38,6 @@ void ct_add(ctTree* ct, uint32_t value);
 
 void ct_print(ctTree* ct, FILE *pFile);
 
-void ct_aux_print(ctNode* node);
 //auxiliares add
 
 ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal);
