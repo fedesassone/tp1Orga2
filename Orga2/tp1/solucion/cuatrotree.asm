@@ -140,12 +140,11 @@ ctIter_new:
 			xor rbx, rbx
 			mov rbx, rdi
 			mov rdi, str_iter_SIZE
-			xor rax, rax
 			call malloc
 			mov [rax + iter_tree_OFFSET], rbx
 			mov qword [rax + iter_node_OFFSET], null
-			mov byte  [rax + iter_current_OFFSET], null
-			mov dword [rax + iter_count_OFFSET], null
+			mov byte  [rax + iter_current_OFFSET], 0
+			mov dword [rax + iter_count_OFFSET], 0
 		add rsp, tamanio_ajustar_pila
 		pop rbx	
 		pop rbp
@@ -170,25 +169,18 @@ ctIter_first:
 		mov rsp, rbp
 		push rbx
 		push r12
-			cmp qword [rdi + iter_tree_OFFSET], null
-			je .fin
-			mov rbx, [rdi+ iter_tree_OFFSET]; en rbx el puntero al tree
-			cmp qword [rdi + tree_root_OFFSET], null
+			mov rbx, rdi ; guardo el iter
+			cmp qword [rbx + iter_tree_OFFSET], null
 			je .fin 
 			mov r12, [rbx + tree_root_OFFSET]; rn r12 el nodo raiz del tree
-			cmp byte [r12 + nodo_len_OFFSET], null
-			je .fin
 			.cicloBuscoMenor:
-			;xor rsi, rsi
-			;mov esi, [r12 + nodo_value0_OFFSET]; tomamos el menor valor
 			cmp qword [r12 + nodo_hijo0_OFFSET], null
 			je .menorNodo
 			mov r12,  [r12 + nodo_hijo0_OFFSET]
 			jmp .cicloBuscoMenor
-			.menorNodo: ; entramos aca si estamos en el nodo de abajo a la izq de todo
-			mov [rdi + iter_tree_OFFSET], rbx ; el tree 
+			.menorNodo: ; entramos aca si estamos en el nodo de abajo a la izq de todo 
 			mov [rdi + iter_node_OFFSET], r12 ; el nodo
-			mov byte  [rdi + iter_current_OFFSET], null; el current (es 0 la primer posicion)
+			mov byte  [rdi + iter_current_OFFSET], 0; el current (es 0 la primer posicion)
 			mov dword [rdi + iter_count_OFFSET], 1 ;contador, al posicionar el primero es 1 
 		.fin:
 		pop r12
@@ -203,15 +195,19 @@ ctIter_first:
 ctIter_next:
 		push rbp
 		mov rsp, rbp
+		push rbx
+		push r12
+			mov rbx, rdi; guardo el iter en rbx
+			;incremento current
 			xor rcx, rcx
 			mov cl, [rdi + iter_current_OFFSET]
 			inc cl
 			mov [rdi + iter_current_OFFSET], cl
 			.hijo?:
-			mov r9, [rdi + iter_node_OFFSET]; el nodo en r9
-			lea r8, [r9 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
+			mov r12, [rbx + iter_node_OFFSET]; el nodo en r12
+			lea r8, [r12 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
 			shl rcx, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
-			cmp qword [r8 + rcx], null ; me fijo si el hijo de current es null
+			cmp qword [r8 + rcx], null ; me fijo si el hijo de current a la derecha es null
 			je .noHijos
 			jmp .hijos
 			.noHijos:
@@ -226,13 +222,18 @@ ctIter_next:
 			call ctIter_aux_up
 			jmp .fin
 			.hijos:
-			mov r8, [r8 + rcx]; el hijo de current 
+			mov rdi, rbx
+			mov r8, [r8 + rcx]; el hijo de current
 			mov [rdi + iter_node_OFFSET], r8
+			 ;CHEQUEAR
+			;mov [rdi + iter_node_OFFSET], r8
 			call ctIter_aux_down
 			.fin:
 			mov esi, [rdi + iter_count_OFFSET]
 			inc esi
 			mov [rdi + iter_count_OFFSET], esi ;aumento el count en 1
+		pop r12
+		pop rbx		
 		pop rbp
         ret
 
