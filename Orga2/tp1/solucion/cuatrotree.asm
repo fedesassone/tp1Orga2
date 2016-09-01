@@ -197,41 +197,46 @@ ctIter_next:
 		mov rsp, rbp
 		push rbx
 		push r12
+		push r13
+		push r14
 			mov rbx, rdi; guardo el iter en rbx
-			;incremento current
+			.incrementoCurr:
 			xor rcx, rcx
-			mov cl, [rdi + iter_current_OFFSET]
+			mov cl, [rbx + iter_current_OFFSET]
 			inc cl
-			mov [rdi + iter_current_OFFSET], cl
-			.hijo?:
+			mov [rbx + iter_current_OFFSET], cl
+			mov r13, rcx ;guardo el current 
+			.chequeoHijosSinRecorrer:
 			mov r12, [rbx + iter_node_OFFSET]; el nodo en r12
-			lea r8, [r12 + nodo_hijo0_OFFSET]; r8= direcc del array de hijos
-			shl rcx, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
-			cmp qword [r8 + rcx], null ; me fijo si el hijo de current a la derecha es null
-			je .noHijos
-			jmp .hijos
-			.noHijos:
-			shr rcx, 3
-			xor rax, rax
-			mov al, [r9 + nodo_len_OFFSET]
-			dec al
-			cmp cl, al
-			jg .calleoUp
-			jmp .fin
+			lea r14, [r12 + nodo_hijo0_OFFSET]; r14= direcc del array de hijos
+			shl r13, 3  ;multiplico cl (current)* 8 (tam de cada pos del array)
+			cmp qword [r14 + r13], null ; me fijo si el hijo de current a la derecha es null
+			je .noHijosSinRec
+			jmp .hijosSinRec
+			.noHijosSinRec:
+			shr r13, 3 ; current 
+			xor rcx, rcx
+			mov cl, [r12 + nodo_len_OFFSET]
+			mov r14, rcx
+			cmp r13, r14 ;comparo Current con Len
+			jg .calleoUp ; si es mas grande me voy arriba si no estoy en el ultimo
+			jmp .aumentoCount
 			.calleoUp:
-			call ctIter_aux_up
-			jmp .fin
-			.hijos:
 			mov rdi, rbx
-			mov r8, [r8 + rcx]; el hijo de current
-			mov [rdi + iter_node_OFFSET], r8
-			 ;CHEQUEAR
-			;mov [rdi + iter_node_OFFSET], r8
+			call ctIter_aux_up
+			jmp .aumentoCount
+			.hijosSinRec:
+			mov r14, [r14 + r13]; el hijo de current
+			mov [rbx + iter_node_OFFSET], r14
+			mov rdi, rbx
 			call ctIter_aux_down
-			.fin:
-			mov esi, [rdi + iter_count_OFFSET]
+			.aumentoCount:
+			mov esi, [rbx + iter_count_OFFSET]
 			inc esi
-			mov [rdi + iter_count_OFFSET], esi ;aumento el count en 1
+			mov [rbx + iter_count_OFFSET], esi ;aumento el count en 1
+			.fin:
+		pop r14
+		pop r13
 		pop r12
 		pop rbx		
 		pop rbp
@@ -272,15 +277,20 @@ ctIter_valid:
 ctIter_aux_down:
 		push rbp
 		mov rsp, rbp
-			mov r8, [rdi + iter_node_OFFSET]
+		push rbx 
+		push r12
+			mov rbx, rdi ; el iter 
+			mov r12, [rbx + iter_node_OFFSET]; el nodo 
 			.ciclo:
-			cmp qword[r8 + nodo_hijo0_OFFSET], null
+			cmp qword[r12 + nodo_hijo0_OFFSET], null
 			je .llegue
-			mov r8, [r8 + nodo_hijo0_OFFSET]
+			mov r12, [r12 + nodo_hijo0_OFFSET]
 			jmp .ciclo
 			.llegue:
-			mov qword [rdi + iter_node_OFFSET], r8
-			mov byte [rdi + iter_current_OFFSET], 0
+			mov qword [rbx + iter_node_OFFSET], r12
+			mov byte [rbx + iter_current_OFFSET], 0
+		pop r12
+		pop rbx
 		pop rbp
 		ret
 
@@ -290,16 +300,31 @@ ctIter_aux_down:
 ctIter_aux_up:
 		push rbp
 		mov rsp, rbp
+		push rbx
 		push r12
 		push r13
+		push r14 
 			mov r12, rdi; guado iter
+			
+			
+			;mov rsi, [rbx + iter_tree_OFFSET]
+			;mov esi, [rsi + tree_size_OFFSET]
+			;cmp esi, [rbx + iter_count_OFFSET]
+			;je .invalidar
+			jmp .fin
+			.invalidar:
+			;mov qword [rbx + iter_node_OFFSET], null
+
+
+			soyRaiz?:
+			mov 
 			.inicio:
 			mov rdi, [r12 + iter_node_OFFSET];nodo actual
 			mov rsi, [rdi + nodo_padre_OFFSET];padre actual
-			mov dl, [rsi + nodo_len_OFFSET];long de padre 
-			inc dl ; long del nodo+1
+			mov bl, [rsi + nodo_len_OFFSET];long de padre 
+			inc bl ; long del padre +1
 			call ctIter_aux_isIn
-			cmp al, dl ; veo si son =
+			cmp al, bl ; veo si son =
 			jne .sigoSubiendo ;es el ultimo  //Consultar si se hace así 
 			mov [r12 + iter_node_OFFSET], rsi; paso al padre 
 			jmp .fin
@@ -307,8 +332,10 @@ ctIter_aux_up:
 			mov [r12 + iter_node_OFFSET], rsi;paso el padre y sigo sub..
 			jmp .inicio
 		.fin:	
+		pop r14 
 		pop r13
 		pop r12
+		pop rbx 
 		pop rbp
 		ret
 
@@ -319,19 +346,21 @@ ctIter_aux_up:
 ctIter_aux_isIn:
 		push rbp
 		mov rsp, rbp
-		;rdi = nodo actual
-		;rsi = padre
-		xor rcx, rcx
-		lea r8,[rsi+nodo_hijo0_OFFSET]
-		.ciclo:
-		cmp [r8], rdi
-		je .encontrado
-		inc ecx
-		lea r8, [r8 + 8]
-		jmp .ciclo
-		.encontrado:
-		xor rax, rax
-		mov eax, ecx
+		push rbx 
+		push r12 
+			xor r12, r12 
+			lea rbx,[rsi + nodo_hijo0_OFFSET] ; array de hijos 
+			.ciclo:
+			cmp [rbx], rdi
+			je .encontrado
+			inc r12
+			lea rbx, [rbx + 8]
+			jmp .ciclo
+			.encontrado:
+			xor rax, rax
+			mov rax, r12
+		pop r12
+		pop rbx 
 		pop rbp
 		ret
 
