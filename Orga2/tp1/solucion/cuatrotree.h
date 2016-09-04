@@ -40,6 +40,8 @@ void ct_print(ctTree* ct, FILE *pFile);
 
 void ct_borrarNodo(ctNode* nodo);
 
+ctNode* ct_nuevoNodo(ctNode* padre);
+
 //auxiliares add
 
 ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal);
@@ -68,4 +70,3 @@ void ctIter_aux_down(ctIter* ctIt);
 void ctIter_aux_up(ctIter* ctIt);
 
 uint32_t ctIter_aux_isIn(ctNode* current, ctNode* father);
-

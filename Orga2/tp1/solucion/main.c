@@ -6,7 +6,7 @@
 int main (void){
     char* name = "pruebas.txt";
     FILE *pFile = fopen( name, "a" );
-    
+
     ctTree* arbol = NULL;
     ctTree** pArbol = &(arbol);
     ct_new(pArbol);
@@ -29,7 +29,7 @@ int main (void){
     ct_delete(pArbol);
 
     fprintf(pFile,"-\n");
-        
+
     fclose( pFile );
-    return 0;    
+    return 0;
 }
