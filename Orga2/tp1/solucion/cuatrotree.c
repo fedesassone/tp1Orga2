@@ -1,11 +1,25 @@
 #include "cuatrotree.h"
 
 void ct_add(ctTree* ct, uint32_t newVal) {
+	if(ct->root == NULL){
+		ctNode *nuevo = malloc(sizeof(ctNode));
+		nuevo->father = NULL;
+		nuevo->value[0]=newVal;
+		nuevo->value[1]=0;
+		nuevo->value[2]=0;
+		nuevo->len =1;
+		nuevo->child[0]= NULL;
+		nuevo->child[1]= NULL;
+		nuevo->child[2]= NULL;
+		nuevo->child[3]= NULL;
+		return; 
+	}
 	ctNode *raiz = ct->root;
 	ctNode *aRellenar = ct_aux_search(&raiz,NULL,newVal);
 	ct_aux_fill(aRellenar, newVal);
 	ct->size++;
 }
+
 ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 	
 	if ((*currNode)->len!=3) return (*currNode);
