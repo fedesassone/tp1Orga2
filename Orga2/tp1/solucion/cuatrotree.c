@@ -6,6 +6,7 @@ void ct_add(ctTree* ct, uint32_t newVal) {
 		nuevo->value[0]= newVal;
 		nuevo->len++;
 		ct->root = nuevo;
+		ct->size++;
 		return;
 	}
 	ctNode *raiz = ct->root;

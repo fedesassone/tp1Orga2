@@ -44,7 +44,7 @@
 
 section .text
 
-format:  DB '%d', 10
+format:  DB '%u', 10
 
 ; Se preservan RBX; R12, R13, R14 y R15
 ; Entran por, en orden: rdi, rsi, rdx, rcx, r8, r9, pila.
@@ -134,6 +134,7 @@ ct_print:
 		push r12
 		push r13
 		push r14
+	
 			mov rbx, rdi; el puntero a arbol
 			mov r12, rsi; el *pfile
 			call ctIter_new
@@ -158,6 +159,7 @@ ct_print:
 			.invalido:
 			mov rdi, r13
 			call ctIter_delete
+			
 		pop r14
 		pop r13
 		pop r12
@@ -172,7 +174,6 @@ ctIter_new:
 		mov rbp, rsp
 		push rbx
 		sub rsp, tamanio_ajustar_pila
-			xor rbx, rbx
 			mov rbx, rdi
 			mov rdi, str_iter_SIZE
 			call malloc
@@ -207,7 +208,8 @@ ctIter_first:
 			mov rbx, rdi ; guardo el iter
 			cmp qword [rbx + iter_tree_OFFSET], null
 			je .fin
-			mov r12, [rbx + tree_root_OFFSET]; rn r12 el nodo raiz del tree
+			mov r12, [rbx + iter_tree_OFFSET]; el arbol en r12
+			mov r12, [r12 + tree_root_OFFSET]; rn r12 el nodo raiz del tree
 			.cicloBuscoMenor:
 			cmp qword [r12 + nodo_hijo0_OFFSET], null
 			je .menorNodo
@@ -254,7 +256,7 @@ ctIter_next:
 			mov cl, [r12 + nodo_len_OFFSET]
 			mov r14, rcx
 			cmp r13, r14 ;comparo Current con Len
-			jg .calleoUp ; si es mas grande me voy arriba si no estoy en el ultimo
+			jge .calleoUp ; si es mas grande me voy arriba si no estoy en el ultimo
 			jmp .aumentoCount
 			.calleoUp:
 			mov rdi, rbx
@@ -282,13 +284,18 @@ ctIter_next:
 ctIter_get:
 		push rbp
 		mov rbp, rsp
-			xor rax, rax
+		push rbx
+		push r12
+			mov rbx, rdi ;el iter en rbx
+			mov r8, [rbx+ iter_node_OFFSET]; nodo en r8
 			xor rcx, rcx
-			mov r8, [rdi + iter_node_OFFSET]
-			mov cl, [rdi + iter_current_OFFSET]
-			lea r9, [r8 + nodo_value0_OFFSET]
-			add r9, rcx
-			mov rax, r9
+			xor rax, rax
+			mov cl, [rbx+ iter_current_OFFSET]; el actual en cl
+			shl rcx, 2 ; rcx = current*4 (tam de value)
+			lea r12, [r8 + nodo_value0_OFFSET]; direcc del array de values
+			mov eax, [r12 + rcx] 
+		pop r12
+		pop r12
 		pop rbp
         ret
 
@@ -297,9 +304,10 @@ ctIter_get:
 ctIter_valid:
 		push rbp
 		mov rbp, rsp
+		xor rax, rax
 			cmp qword [rdi + iter_node_OFFSET], null
 			je .notValid
-			mov rax, 1
+			mov eax, 1
 			jmp .fin
 			.notValid:
 			xor rax, rax

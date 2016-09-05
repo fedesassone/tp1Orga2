@@ -21,11 +21,27 @@ int main (void){
     ct_add(*(pArbol),39);
     ct_add(*(pArbol),4);
 
-	ctIter* iter = ctIter_new(*(pArbol));
-    ctIter_first(iter);
-    //fprintf(stdout, "%i\n",ctIter_get(iter));
-    printf("%i\n",ctIter_get(iter));
-    //ct_print(*(arbol),pFile);
+//Prueba print:
+ct_print(arbol,pFile);
+
+
+//ctIter_next(iter);
+//printf("%i\n",arbol->size);
+//ctIter* iter = ctIter_new(*(pArbol));
+//printf("%i\n",ctIter_valid(iter));
+//ctIter_first(iter);
+//printf("%i\n",ctIter_valid(iter));
+
+//for(uint32_t i = 0; i<arbol->size;i++){
+//	printf("%i\n",ctIter_get(iter));
+//	ctIter_next(iter);
+//	printf("%i\n",ctIter_valid(iter));	
+//}
+
+//printf("%i\n",ctIter_valid(iter));
+ // ctIter_delete(iter);
+
+  
     ct_delete(pArbol);
 
     fprintf(pFile,"-\n");
