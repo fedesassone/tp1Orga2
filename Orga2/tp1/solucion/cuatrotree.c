@@ -1,9 +1,10 @@
 #include "cuatrotree.h"
-
+//agregar funcionando de diez
 void ct_add(ctTree* ct, uint32_t newVal) {
 	if(ct->root == NULL){
 		ctNode *nuevo = ct_nuevoNodo(NULL);
 		nuevo->value[0]= newVal;
+		nuevo->len++;
 		ct->root = nuevo;
 		return;
 	}
@@ -16,7 +17,6 @@ void ct_add(ctTree* ct, uint32_t newVal) {
 ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 	ctNode* actual = (*currNode);
 	if (actual->len<3) return actual;
-	//for(int i=0;i<3;i++){
 	if (actual->value[0]>newVal){
 		if(actual->child[0]!=NULL)
 			return ct_aux_search(&(actual->child[0]),actual,newVal);
@@ -49,7 +49,6 @@ ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 }
 
 void ct_aux_fill(ctNode* currNode, uint32_t newVal){
-	//dado un nodo, agrega ordenadamente el valor haciendo los movimientos necesarios y aumentando el tam del nodo
 	if(currNode->len == 0){
 		currNode->value[0]=newVal;
 		currNode->len++;
