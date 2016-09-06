@@ -11,12 +11,14 @@ void ct_add(ctTree* ct, uint32_t newVal) {
 	}
 	ctNode *raiz = ct->root;
 	ctNode *aRellenar = ct_aux_search(&raiz,NULL,newVal);
+	if(aRellenar == NULL)return;
 	ct_aux_fill(aRellenar, newVal);
 	ct->size++;
 }
 
 ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 	ctNode* actual = (*currNode);
+	if(actual->value[0] == newVal || actual->value[1] == newVal || actual->value[2] == newVal) return NULL;
 	if (actual->len<3) return actual;
 	if (actual->value[0]>newVal){
 		if(actual->child[0]!=NULL)
@@ -50,7 +52,6 @@ ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 }
 
 void ct_aux_fill(ctNode* currNode, uint32_t newVal){
-	if(currNode == NULL)return;
 	if(currNode->len == 0){
 		currNode->value[0]=newVal;
 		currNode->len++;
@@ -94,9 +95,9 @@ void ct_aux_fill(ctNode* currNode, uint32_t newVal){
 ctNode* ct_nuevoNodo(ctNode* padre){
 	ctNode *nuevo = malloc(sizeof(ctNode));
 	nuevo->father = padre;
-	nuevo->value[0]=0;
-	nuevo->value[1]=0;
-	nuevo->value[2]=0;
+	nuevo->value[0]=-1;
+	nuevo->value[1]=-1;
+	nuevo->value[2]=-1;
 	nuevo->len =0;
 	nuevo->child[0]= NULL;
 	nuevo->child[1]= NULL;

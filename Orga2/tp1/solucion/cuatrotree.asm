@@ -280,8 +280,8 @@ ctIter_next:
 			call ctIter_aux_down
 			.aumentoCount:
 			xor rsi, rsi
-			;mov esi, [rbx + iter_count_OFFSET]
-			;inc esi
+			mov esi, [rbx + iter_count_OFFSET]
+			inc esi
 			mov [rbx + iter_count_OFFSET], esi ;aumento el count en 1
 			jmp .fin 
 			;sigoValido?:
@@ -309,7 +309,6 @@ ctIter_get:
 		mov rbp, rsp
 		push rbx
 		push r12
-
 			mov rbx, rdi; iter en rdx
 			mov r12, [rbx + iter_node_OFFSET]
 			xor rdx, rdx
@@ -317,19 +316,6 @@ ctIter_get:
 			shl rdx, 2
 			lea r12, [r12 + nodo_value0_OFFSET]
 			mov eax, [r12 + rdx]
-
-
-
-;			mov rbx, rdi ;el iter en rbx
-;			mov r8, [rbx + iter_node_OFFSET]; nodo en r8
-;			xor rcx, rcx
-;			xor rax, rax
-;			mov cl, [rbx+ iter_current_OFFSET]; el actual en cl
-;			shl rcx, 2 ; rcx = current*4 (tam de value)
-;			lea r12, [r8 + nodo_value0_OFFSET]; direcc del array de values
-;			mov eax, [r12 + rcx] 
-
-
 		pop r12
 		pop rbx
 		pop rbp

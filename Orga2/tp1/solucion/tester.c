@@ -42,9 +42,6 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
-
-    //fclose( pFile );
-
     fputs( ">>> Test : operaciones caso borde 2\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 100);
@@ -137,9 +134,6 @@ void casoC(){
     printIterador(pFile,myCT);
     ct_delete(&myCT);
 
-    
-    //fclose( pFile );
-
 
 
     fputs( ">>> Test : caso chico random 1\n", pFile );
@@ -150,6 +144,9 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+//printea lo que agrega, y el size
+
     fputs( ">>> Test : caso chico random 2\n", pFile );
     srand(970);
     ct_new(&myCT);
