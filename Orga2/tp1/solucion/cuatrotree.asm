@@ -42,13 +42,10 @@
   %define iter_current_OFFSET 	16
   %define iter_count_OFFSET		17
   
-  
 section .rodata
 
 format: 			DB '%i', 10
 section .text
-
-
 
 ; Se preservan RBX; R12, R13, R14 y R15
 ; Entran por, en orden: rdi, rsi, rdx, rcx, r8, r9, pila.
@@ -229,7 +226,6 @@ ctIter_first:
 ; =====================================
 ; void ctIter_next(ctIter* ctIt);
 ;iter de la forma: |*tree|*nodo actual|byte valorActual|double Count|
-;//Consultar como chequear si es el último
 ctIter_next:
 		push rbp
 		mov rbp, rsp
@@ -284,16 +280,8 @@ ctIter_next:
 			inc esi
 			mov [rbx + iter_count_OFFSET], esi ;aumento el count en 1
 			jmp .fin 
-			;sigoValido?:
-			;mov eax, [rbx + iter_count_OFFSET]
-			;mov r12, [rbx + iter_tree_OFFSET]
-			;mov edx, [r12 + tree_size_OFFSET]
-			;cmp eax, edx
-			;jg .fin
 			.invalidar:
 			mov qword [rbx + iter_node_OFFSET], null
-			;mov dword [rbx + iter_count_OFFSET], null
-
 			.fin:
 		pop r14
 		pop r13
