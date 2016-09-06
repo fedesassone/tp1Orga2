@@ -11,8 +11,8 @@ void casoG();
 int main() {
   remove(archivoCasoChico);
   casoC();
-  //remove(archivoCasoGrande);
-  //casoG();
+  remove(archivoCasoGrande);
+  casoG();
   return 0;
 }
 

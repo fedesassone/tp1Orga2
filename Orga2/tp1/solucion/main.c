@@ -7,6 +7,12 @@ int main (void){
     char* name = "pruebas.txt";
     FILE *pFile = fopen( name, "a" );
 
+    char* mio = "salida.caso.grande.txt";
+    FILE *pFile = fopen(miomio, "a");
+
+    char* cat = "Catedra.salida.caso.chico.txt";
+    FILE *pFile = fopen(catcat, "a");
+
     ctTree* arbol = NULL;
     ctTree** pArbol = &(arbol);
     ct_new(pArbol);
