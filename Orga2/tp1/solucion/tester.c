@@ -36,12 +36,17 @@ void casoC(){
     FILE *pFile;
     pFile = fopen( archivoCasoChico, "a" );
     ctTree* myCT;
+
+
+
     fputs( ">>> Test : operaciones caso borde 1\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 100);
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+
     fputs( ">>> Test : operaciones caso borde 2\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 100);
@@ -49,6 +54,8 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+
     fputs( ">>> Test : operaciones caso borde 3\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 100);
@@ -57,6 +64,9 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+    
+
+
     fputs( ">>> Test : operaciones caso borde 4\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 200);
@@ -65,6 +75,8 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+    
+
     fputs( ">>> Test : operaciones caso borde 5\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 300);
@@ -82,6 +94,9 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+
+
     fputs( ">>> Test : operaciones caso borde 7\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 300);
@@ -91,6 +106,9 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+
+
     fputs( ">>> Test : operaciones caso borde 8\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 300);
@@ -219,6 +237,8 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+
     fclose( pFile );
 }
 

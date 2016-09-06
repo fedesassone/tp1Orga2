@@ -100,20 +100,42 @@ ct_borrarNodo:
 		push r14
 			mov rbx, rdi
 			xor r12, r12
-			mov rcx, 4
-			lea r13, [rbx +nodo_hijo0_OFFSET]
-			.ciclo:
-			cmp qword [r13+r12], null
+			.prim:
+			cmp qword [rbx + nodo_hijo0_OFFSET], null
+			je .noPrim
+			jmp .borrarPrim
+			.noPrim:
+			cmp qword [rbx + nodo_hijo1_OFFSET], null
+			je .noSeg 
+			jmp .borrarSeg
+			.noSeg:
+			cmp qword [rbx + nodo_hijo2_OFFSET], null
+			je .noTer
+			jmp .borrarTer
+			.noTer:
+			cmp qword [rbx + nodo_hijo3_OFFSET], null 	
 			je .finSubHijos
-			mov rdi, [r13+r12]
-			mov r14, rcx
+			jmp .borrarCuar
+			.borrarPrim:
+			mov rdi, [rbx + nodo_hijo0_OFFSET]
 			call ct_borrarNodo
-			mov rcx, r14
-			add r12, 8
-			loop .ciclo
+			jmp .noPrim
+			.borrarSeg:
+			mov rdi, [rbx + nodo_hijo1_OFFSET]
+			call ct_borrarNodo
+			jmp .noSeg
+			.borrarTer:
+			mov rdi, [rbx + nodo_hijo2_OFFSET]
+			call ct_borrarNodo
+			jmp .noTer
+			.borrarCuar:
+			mov rdi, [rbx + nodo_hijo3_OFFSET]
+			call ct_borrarNodo
 			.finSubHijos:
 			mov rdi, rbx
 			call free
+
+
 		pop r14
 		pop r13
 		pop r12

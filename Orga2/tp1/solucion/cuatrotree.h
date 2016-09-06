@@ -14,10 +14,10 @@ typedef struct ctTree_t {
 } __attribute__((__packed__)) ctTree;
 
 typedef struct ctNode_t {
-  struct ctNode_t* father;
-  uint32_t value[NODESIZE];
-  uint8_t len;
-  struct ctNode_t* child[NODESIZE+1];
+  struct ctNode_t* father;            //tam = 8   Off= 0
+  uint32_t value[NODESIZE];           //tam = 3*4=12 off = 20
+  uint8_t len;                        //tam = 1 off = 21
+  struct ctNode_t* child[NODESIZE+1]; //tam = 4*8 = 32, off = 53
 } __attribute__((__packed__)) ctNode;
 
 typedef struct ctIter_t {
