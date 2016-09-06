@@ -26,6 +26,7 @@
 
   %define tree_root_OFFSET	 	0
   %define tree_size_OFFSET		8
+
   %define nodo_padre_OFFSET		0
   %define nodo_value0_OFFSET	8
   %define nodo_value1_OFFSET	12
@@ -40,11 +41,14 @@
   %define iter_node_OFFSET		8
   %define iter_current_OFFSET 	16
   %define iter_count_OFFSET		17
+  
+  
+section .rodata
 
-
+format: 			DB '%i', 10
 section .text
 
-format:  DB '%u', 10
+
 
 ; Se preservan RBX; R12, R13, R14 y R15
 ; Entran por, en orden: rdi, rsi, rdx, rcx, r8, r9, pila.
@@ -122,9 +126,6 @@ ct_borrarNodo:
 
 ; ; =====================================
 ; ;void ct_print(ctTree* ct, FILE *pFile);
-  ; tiene que devolver las claves ordenadas:
-  ; idea: ir al primero, printear nodo, subir y printear hojas
-  ; int fprintf ( FILE * stream, const char * format, ... );
 ct_print:
 ;rdi = ẗree
 ;rsi = *pfile
@@ -134,7 +135,6 @@ ct_print:
 		push r12
 		push r13
 		push r14
-	
 			mov rbx, rdi; el puntero a arbol
 			mov r12, rsi; el *pfile
 			call ctIter_new
@@ -152,6 +152,7 @@ ct_print:
 			mov edx, [r14 + rax];lo muevo valueSize*current veces
 			mov rdi, r12 ; el pFile
 			mov rsi, format
+			mov rax, 0
 			call fprintf
 			mov rdi, r13
 			call ctIter_next
@@ -159,14 +160,12 @@ ct_print:
 			.invalido:
 			mov rdi, r13
 			call ctIter_delete
-			
 		pop r14
-		pop r13
+		pop r13;
 		pop r12
 		pop rbx
 		pop rbp
         ret
-
 ; =====================================
 ; ctIter* ctIter_new(ctTree* ct);
 ctIter_new:
@@ -209,6 +208,8 @@ ctIter_first:
 			cmp qword [rbx + iter_tree_OFFSET], null
 			je .fin
 			mov r12, [rbx + iter_tree_OFFSET]; el arbol en r12
+			cmp qword [r12 + tree_root_OFFSET], null
+			je .fin 
 			mov r12, [r12 + tree_root_OFFSET]; rn r12 el nodo raiz del tree
 			.cicloBuscoMenor:
 			cmp qword [r12 + nodo_hijo0_OFFSET], null
@@ -216,9 +217,9 @@ ctIter_first:
 			mov r12,  [r12 + nodo_hijo0_OFFSET]
 			jmp .cicloBuscoMenor
 			.menorNodo: ; entramos aca si estamos en el nodo de abajo a la izq de todo
-			mov [rdi + iter_node_OFFSET], r12 ; el nodo
-			mov byte  [rdi + iter_current_OFFSET], 0; el current (es 0 la primer posicion)
-			mov dword [rdi + iter_count_OFFSET], 1 ;contador, al posicionar el primero es 1
+			mov [rbx + iter_node_OFFSET], r12 ; el nodo
+			mov byte  [rbx + iter_current_OFFSET], 0; el current (es 0 la primer posicion)
+			mov dword [rbx + iter_count_OFFSET], 1 ;contador, al posicionar el primero es 1
 		.fin:
 		pop r12
 		pop rbx
@@ -237,6 +238,16 @@ ctIter_next:
 		push r13
 		push r14
 			mov rbx, rdi; guardo el iter en rbx
+			.chequeoValido:
+			xor rax, rax
+			xor rdx, rdx
+			cmp qword [rbx + iter_node_OFFSET], null
+			je .fin 
+			mov eax, [rbx + iter_count_OFFSET]
+			mov r12, [rbx + iter_tree_OFFSET]
+			mov edx, [r12 + tree_size_OFFSET]
+			cmp eax, edx
+			jge .invalidar
 			.incrementoCurr:
 			xor rcx, rcx
 			mov cl, [rbx + iter_current_OFFSET]
@@ -268,9 +279,21 @@ ctIter_next:
 			mov rdi, rbx
 			call ctIter_aux_down
 			.aumentoCount:
-			mov esi, [rbx + iter_count_OFFSET]
-			inc esi
+			xor rsi, rsi
+			;mov esi, [rbx + iter_count_OFFSET]
+			;inc esi
 			mov [rbx + iter_count_OFFSET], esi ;aumento el count en 1
+			jmp .fin 
+			;sigoValido?:
+			;mov eax, [rbx + iter_count_OFFSET]
+			;mov r12, [rbx + iter_tree_OFFSET]
+			;mov edx, [r12 + tree_size_OFFSET]
+			;cmp eax, edx
+			;jg .fin
+			.invalidar:
+			mov qword [rbx + iter_node_OFFSET], null
+			;mov dword [rbx + iter_count_OFFSET], null
+
 			.fin:
 		pop r14
 		pop r13
@@ -286,16 +309,29 @@ ctIter_get:
 		mov rbp, rsp
 		push rbx
 		push r12
-			mov rbx, rdi ;el iter en rbx
-			mov r8, [rbx+ iter_node_OFFSET]; nodo en r8
-			xor rcx, rcx
-			xor rax, rax
-			mov cl, [rbx+ iter_current_OFFSET]; el actual en cl
-			shl rcx, 2 ; rcx = current*4 (tam de value)
-			lea r12, [r8 + nodo_value0_OFFSET]; direcc del array de values
-			mov eax, [r12 + rcx] 
+
+			mov rbx, rdi; iter en rdx
+			mov r12, [rbx + iter_node_OFFSET]
+			xor rdx, rdx
+			mov dl, [rbx + iter_current_OFFSET]
+			shl rdx, 2
+			lea r12, [r12 + nodo_value0_OFFSET]
+			mov eax, [r12 + rdx]
+
+
+
+;			mov rbx, rdi ;el iter en rbx
+;			mov r8, [rbx + iter_node_OFFSET]; nodo en r8
+;			xor rcx, rcx
+;			xor rax, rax
+;			mov cl, [rbx+ iter_current_OFFSET]; el actual en cl
+;			shl rcx, 2 ; rcx = current*4 (tam de value)
+;			lea r12, [r8 + nodo_value0_OFFSET]; direcc del array de values
+;			mov eax, [r12 + rcx] 
+
+
 		pop r12
-		pop r12
+		pop rbx
 		pop rbp
         ret
 
@@ -304,10 +340,9 @@ ctIter_get:
 ctIter_valid:
 		push rbp
 		mov rbp, rsp
-		xor rax, rax
 			cmp qword [rdi + iter_node_OFFSET], null
 			je .notValid
-			mov eax, 1
+			mov rax, 1
 			jmp .fin
 			.notValid:
 			xor rax, rax

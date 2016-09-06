@@ -11,8 +11,8 @@ void casoG();
 int main() {
   remove(archivoCasoChico);
   casoC();
-  remove(archivoCasoGrande);
-  casoG();
+  //remove(archivoCasoGrande);
+  //casoG();
   return 0;
 }
 
@@ -42,6 +42,9 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+    //fclose( pFile );
+
     fputs( ">>> Test : operaciones caso borde 2\n", pFile );
     ct_new(&myCT);
     printAdd(pFile, myCT, 100);
@@ -133,6 +136,12 @@ void casoC(){
     ct_print(myCT,pFile);
     printIterador(pFile,myCT);
     ct_delete(&myCT);
+
+    
+    //fclose( pFile );
+
+
+
     fputs( ">>> Test : caso chico random 1\n", pFile );
     srand(70);
     ct_new(&myCT);

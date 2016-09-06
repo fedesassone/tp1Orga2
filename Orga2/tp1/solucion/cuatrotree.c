@@ -50,6 +50,7 @@ ctNode* ct_aux_search(ctNode** currNode, ctNode* fatherNode, uint32_t newVal){
 }
 
 void ct_aux_fill(ctNode* currNode, uint32_t newVal){
+	if(currNode == NULL)return;
 	if(currNode->len == 0){
 		currNode->value[0]=newVal;
 		currNode->len++;
@@ -61,10 +62,12 @@ void ct_aux_fill(ctNode* currNode, uint32_t newVal){
 			currNode->len++;
 			return;
 		}
-		currNode->value[1]=currNode->value[0];
-		currNode->value[0]=newVal;
-		currNode->len++;
-		return;
+		if(currNode->value[0]>newVal){
+			currNode->value[1]=currNode->value[0];
+			currNode->value[0]=newVal;
+			currNode->len++;
+			return;
+		}
 	}
 	if(currNode->len==2){
 		if(currNode->value[1]<newVal){
@@ -79,10 +82,12 @@ void ct_aux_fill(ctNode* currNode, uint32_t newVal){
 			currNode->len++;
 			return;
 		}
-		currNode->value[2]=currNode->value[1];
-		currNode->value[1]=newVal;
-		currNode->len++;
-		return;
+		if(currNode->value[0]<newVal && currNode->value[1]>newVal){
+			currNode->value[2]=currNode->value[1];
+			currNode->value[1]=newVal;
+			currNode->len++;
+			return;	
+		}
 	}
 }
 

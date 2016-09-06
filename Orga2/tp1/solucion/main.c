@@ -22,9 +22,9 @@ int main (void){
     ct_add(*(pArbol),4);
 
 //Prueba print:
-ct_print(arbol,pFile);
+ ct_print(arbol,pFile);
 
-
+//ctIter* iter=ctIter_new(arbol);
 //ctIter_next(iter);
 //printf("%i\n",arbol->size);
 //ctIter* iter = ctIter_new(*(pArbol));
@@ -33,9 +33,9 @@ ct_print(arbol,pFile);
 //printf("%i\n",ctIter_valid(iter));
 
 //for(uint32_t i = 0; i<arbol->size;i++){
-//	printf("%i\n",ctIter_get(iter));
+	//printf("%i\n",ctIter_get(iter));
 //	ctIter_next(iter);
-//	printf("%i\n",ctIter_valid(iter));	
+	//printf("%i\n",ctIter_valid(iter));	
 //}
 
 //printf("%i\n",ctIter_valid(iter));

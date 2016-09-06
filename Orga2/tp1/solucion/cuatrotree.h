@@ -9,8 +9,8 @@
 #define NODESIZE 3
 
 typedef struct ctTree_t {
-  struct ctNode_t* root;
-  uint32_t size;
+  struct ctNode_t* root;            //tam = 8   off = 0
+  uint32_t size;                    //tam = 4   off = 8    tot = 12
 } __attribute__((__packed__)) ctTree;
 
 typedef struct ctNode_t {
@@ -21,10 +21,10 @@ typedef struct ctNode_t {
 } __attribute__((__packed__)) ctNode;
 
 typedef struct ctIter_t {
-  ctTree* tree;
-  struct ctNode_t* node;
-  uint8_t current;
-  uint32_t count;
+  ctTree* tree;                       //tam = 8   off = 0
+  struct ctNode_t* node;              //tam = 8   off = 7
+  uint8_t current;                    //tam = 1   off = 16
+  uint32_t count;                     //tam = 4   off = 17  tot = 21
 } __attribute__((__packed__)) ctIter;
 
 
@@ -37,6 +37,8 @@ void ct_delete(ctTree** pct);
 void ct_add(ctTree* ct, uint32_t value);
 
 void ct_print(ctTree* ct, FILE *pFile);
+
+//void ct_print_nodo(ctNode* nodo,*pFile archivo);
 
 void ct_borrarNodo(ctNode* nodo);
 
